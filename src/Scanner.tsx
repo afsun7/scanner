@@ -163,6 +163,7 @@ const Scanner: FC<ScannerProps> = ({
       );
       Quagga.onDetected(errorCheck);
     };
+
     init();
     // cleanup by turning off the camera and any listeners
     return () => {
