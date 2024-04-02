@@ -44,7 +44,7 @@ const defaultDecoders = ["ean_reader"] as DecoderType[];
 type DecoderType = QuaggaJSReaderConfig | QuaggaJSCodeReader;
 interface ScannerProps {
   onDetected: (result: any) => void;
-  scannerRef: RefObject<HTMLDivElement>;
+  scannerRef?: RefObject<HTMLDivElement> | null;
   onScannerReady?: () => void;
   cameraId?: string | null;
   facingMode?: string;
