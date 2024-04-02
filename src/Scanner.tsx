@@ -140,7 +140,7 @@ const Scanner: FC<ScannerProps> = ({
               ...(cameraId && { deviceId: cameraId }),
               ...(!cameraId && { facingMode }),
             },
-            target: scannerRef.current,
+            target: scannerRef?.current,
             willReadFrequently: true,
           },
           locator,
