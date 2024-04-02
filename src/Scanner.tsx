@@ -119,12 +119,18 @@ const Scanner: FC<ScannerProps> = ({
   };
 
   useEffect(() => {
+    // if this component gets unmounted in the same tick that it is mounted, then all hell breaks loose,
+    // so we need to wait 1 tick before calling init().  I'm not sure how to fix that, if it's even possible,
+    // given the asynchronous nature of the camera functions, the non asynchronous nature of React, and just how
+    // awful browsers are at dealing with cameras.
     let ignoreStart = false;
     const init = async () => {
+      // wait for one tick to see if we get unmounted before we can possibly even begin cleanup
       await new Promise((resolve) => setTimeout(resolve, 1));
       if (ignoreStart) {
         return;
       }
+      // begin scanner initialization
       await Quagga.init(
         {
           inputStream: {
@@ -134,20 +140,20 @@ const Scanner: FC<ScannerProps> = ({
               ...(cameraId && { deviceId: cameraId }),
               ...(!cameraId && { facingMode }),
             },
-            target: scannerRef.current!,
+            target: scannerRef.current,
             willReadFrequently: true,
           },
           locator,
           decoder: { readers: decoders },
           locate,
         },
-        async (err: string) => {
+        async (err) => {
           Quagga.onProcessed(handleProcessed);
 
           if (err) {
-            console.error("Error starting Quagga:", err);
+            return console.error("Error starting Quagga:", err);
           }
-          if (scannerRef.current) {
+          if (scannerRef && scannerRef.current) {
             await Quagga.start();
             if (onScannerReady) {
               onScannerReady();
@@ -158,14 +164,25 @@ const Scanner: FC<ScannerProps> = ({
       Quagga.onDetected(errorCheck);
     };
     init();
+    // cleanup by turning off the camera and any listeners
     return () => {
       ignoreStart = true;
       Quagga.stop();
       Quagga.offDetected(errorCheck);
       Quagga.offProcessed(handleProcessed);
     };
-  }, []);
-
+  }, [
+    cameraId,
+    onDetected,
+    onScannerReady,
+    scannerRef,
+    errorCheck,
+    constraints,
+    locator,
+    decoders,
+    locate,
+    facingMode,
+  ]);
   return null;
 };
 
