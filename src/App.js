@@ -2,18 +2,18 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Quagga from "@ericblade/quagga2";
 import Scanner from "./Scanner";
 import Result from "./Result";
-interface ScannerResult {
-  codeResult?: {
-    code: string;
-    // Other properties if available
-  };
-}
+// interface ScannerResult {
+//   codeResult?: {
+//     code: string;
+//     // Other properties if available
+//   };
+// }
 function App() {
   const [scanning, setScanning] = useState(false); // toggleable state for "should render scanner"
   const [cameras, setCameras] = useState([]); // array of available cameras, as returned by Quagga.CameraAccess.enumerateVideoDevices()
   const [cameraId, setCameraId] = useState(null); // id of the active camera device
   const [cameraError, setCameraError] = useState(null); // error message from failing to access the camera
-  const [results, setResults] = useState<ScannerResult[]>([]); // list of scanned results
+  const [results, setResults] = useState([]); // list of scanned results
   const [torchOn, setTorch] = useState(false); // toggleable state for "should torch be on"
   const scannerRef = useRef(null); // reference to the scanner element in the DOM
 
@@ -78,16 +78,15 @@ function App() {
           beforehand
         </p>
       ) : (
-        ""
-        // <form>
-        //   <select onChange={(event) => setCameraId(event.target.value)}>
-        //     {cameras.map((camera) => (
-        //       <option key={camera.deviceId} value={camera.deviceId}>
-        //         {camera?.label || camera.deviceId}
-        //       </option>
-        //     ))}
-        //   </select>
-        // </form>
+        <form>
+          <select onChange={(event) => setCameraId(event.target.value)}>
+            {cameras.map((camera) => (
+              <option key={camera.deviceId} value={camera.deviceId}>
+                {camera?.label || camera.deviceId}
+              </option>
+            ))}
+          </select>
+        </form>
       )}
       <button onClick={onTorchClick}>
         {torchOn ? "Disable Torch" : "Enable Torch"}

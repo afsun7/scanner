@@ -1,13 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { FC, RefObject, useCallback, useEffect } from "react";
-import Quagga, {
-  QuaggaJSCodeReader,
-  QuaggaJSReaderConfig,
-} from "@ericblade/quagga2";
+import { useCallback, useLayoutEffect } from "react";
+import PropTypes from "prop-types";
+import Quagga from "@ericblade/quagga2";
 
-// Function to calculate median of an array
-function getMedian(arr: number[]): number {
-  const newArr = [...arr];
+function getMedian(arr) {
+  const newArr = [...arr]; // copy the array before sorting, otherwise it mutates the array passed in, which is generally undesireable
   newArr.sort((a, b) => a - b);
   const half = Math.floor(newArr.length / 2);
   if (newArr.length % 2 === 1) {
@@ -16,22 +12,15 @@ function getMedian(arr: number[]): number {
   return (newArr[half - 1] + newArr[half]) / 2;
 }
 
-// Function to calculate median of code errors
-interface DecodedCode {
-  error: number; // Assuming error is a number, adjust as necessary
-  // Add other properties if necessary
-}
-
-function getMedianOfCodeErrors(decodedCodes: DecodedCode[]): number {
+function getMedianOfCodeErrors(decodedCodes) {
   const errors = decodedCodes.flatMap((x) => x.error);
   const medianOfErrors = getMedian(errors);
   return medianOfErrors;
 }
 
-// Default settings for constraints, locator, and decoders
 const defaultConstraints = {
   width: 640,
-  height: 300,
+  height: 480,
 };
 
 const defaultLocatorSettings = {
@@ -40,25 +29,9 @@ const defaultLocatorSettings = {
   willReadFrequently: true,
 };
 
-const defaultDecoders = ["ean_reader"] as DecoderType[];
-type DecoderType = QuaggaJSReaderConfig | QuaggaJSCodeReader;
-interface ScannerProps {
-  onDetected: (result: any) => void;
-  scannerRef?: RefObject<HTMLDivElement> | null;
-  onScannerReady?: () => void;
-  cameraId?: string | null;
-  facingMode?: string;
-  constraints?: { width: number; height: number };
-  locator?: {
-    patchSize: string;
-    halfSample: boolean;
-    willReadFrequently: boolean;
-  };
-  decoders?: DecoderType[];
-  locate?: boolean;
-}
+const defaultDecoders = ["ean_reader"];
 
-const Scanner: FC<ScannerProps> = ({
+const Scanner = ({
   onDetected,
   scannerRef,
   onScannerReady,
@@ -70,11 +43,12 @@ const Scanner: FC<ScannerProps> = ({
   locate = true,
 }) => {
   const errorCheck = useCallback(
-    (result: any) => {
+    (result) => {
       if (!onDetected) {
         return;
       }
       const err = getMedianOfCodeErrors(result.codeResult.decodedCodes);
+      // if Quagga is at least 75% certain that it read correctly, then accept the code.
       if (err < 0.25 && result.codeResult.code.length === 13) {
         onDetected(result.codeResult.code);
       }
@@ -82,23 +56,24 @@ const Scanner: FC<ScannerProps> = ({
     [onDetected]
   );
 
-  const handleProcessed = (result: any) => {
+  const handleProcessed = (result) => {
     const drawingCtx = Quagga.canvas.ctx.overlay;
     const drawingCanvas = Quagga.canvas.dom.overlay;
     drawingCtx.font = "24px Arial";
-    // drawingCtx.fillStyle = 'green';
+    drawingCtx.fillStyle = "green";
 
     if (result) {
+      // console.warn('* quagga onProcessed', result);
       if (result.boxes) {
         drawingCtx.clearRect(
           0,
           0,
-          parseInt(drawingCanvas.getAttribute("width") || "0"),
-          parseInt(drawingCanvas.getAttribute("height") || "0")
+          parseInt(drawingCanvas.getAttribute("width")),
+          parseInt(drawingCanvas.getAttribute("height"))
         );
         result.boxes
-          .filter((box: string[]) => box !== result.box)
-          .forEach((box: string[]) => {
+          .filter((box) => box !== result.box)
+          .forEach((box) => {
             Quagga.ImageDebug.drawPath(box, { x: 0, y: 1 }, drawingCtx, {
               color: "purple",
               lineWidth: 2,
@@ -112,13 +87,21 @@ const Scanner: FC<ScannerProps> = ({
         });
       }
       if (result.codeResult && result.codeResult.code) {
+        // const validated = barcodeValidator(result.codeResult.code);
+        // const validated = validateBarcode(result.codeResult.code);
+        // Quagga.ImageDebug.drawPath(result.line, { x: 'x', y: 'y' }, drawingCtx, { color: validated ? 'green' : 'red', lineWidth: 3 });
         drawingCtx.font = "24px Arial";
+        // drawingCtx.fillStyle = validated ? 'green' : 'red';
+        // drawingCtx.fillText(`${result.codeResult.code} valid: ${validated}`, 10, 50);
         drawingCtx.fillText(result.codeResult.code, 10, 20);
+        // if (validated) {
+        //     onDetected(result);
+        // }
       }
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // if this component gets unmounted in the same tick that it is mounted, then all hell breaks loose,
     // so we need to wait 1 tick before calling init().  I'm not sure how to fix that, if it's even possible,
     // given the asynchronous nature of the camera functions, the non asynchronous nature of React, and just how
@@ -140,7 +123,7 @@ const Scanner: FC<ScannerProps> = ({
               ...(cameraId && { deviceId: cameraId }),
               ...(!cameraId && { facingMode }),
             },
-            target: scannerRef?.current,
+            target: scannerRef.current,
             willReadFrequently: true,
           },
           locator,
@@ -184,6 +167,18 @@ const Scanner: FC<ScannerProps> = ({
     facingMode,
   ]);
   return null;
+};
+
+Scanner.propTypes = {
+  onDetected: PropTypes.func.isRequired,
+  scannerRef: PropTypes.object.isRequired,
+  onScannerReady: PropTypes.func,
+  cameraId: PropTypes.string,
+  facingMode: PropTypes.string,
+  constraints: PropTypes.object,
+  locator: PropTypes.object,
+  decoders: PropTypes.array,
+  locate: PropTypes.bool,
 };
 
 export default Scanner;
