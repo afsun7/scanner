@@ -119,6 +119,8 @@ const Scanner = ({
           inputStream: {
             type: "LiveStream",
             constraints: {
+              focusMode: "continuous",
+              facingMode: "environment",
               ...constraints,
               ...(cameraId && { deviceId: cameraId }),
               ...(!cameraId && { facingMode }),
