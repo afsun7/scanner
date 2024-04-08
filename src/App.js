@@ -38,13 +38,13 @@ const App = () => {
           camera.label.toLowerCase().includes("rear")
       )?.deviceId;
 
-      const filterCamera = rearCameraId.find(
+      const filterCameras = rearCameraId.filter(
         (camera) =>
           camera.label.toLowerCase().includes("2 0") ||
           camera.label.toLowerCase().includes("back")
       )?.deviceId;
 
-      setCameraId(filterCamera);
+      setCameraId(filterCameras[0].deviceId);
       return cameras;
     };
     enableCamera()
