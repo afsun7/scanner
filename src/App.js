@@ -31,43 +31,39 @@ const App = () => {
     const enumerateCameras = async () => {
       const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
       console.log("Cameras Detected: ", cameras);
- // پیدا کردن دوربین پشت با بهترین کیفیت
-    const rearCameras = cameras.filter(
-      (camera) => camera.label.toLowerCase().includes("back") || camera.label.toLowerCase().includes("rear")
-    );
-    
-    if (rearCameras.length > 0) {
-   
-    // پیدا کردن دوربین پشت با بهترین کیفیت
-    const rearCameras = cameras.filter(
-      (camera) => camera.label.toLowerCase().includes("back") || camera.label.toLowerCase().includes("rear")
-    );
-    
-    if (rearCameras.length > 0) {
-      // انتخاب دوربین پشت با بهترین کیفیت
-      const bestRearCamera = rearCameras.reduce((prev, current) => {
-        if (current.width > prev.width) {
-          return current;
-        } else {
-          return prev;
-        }
-      });
-      setCameraId(bestRearCamera.deviceId);
-    } else {
-      // اگر دوربین پشت پیدا نشد، دوربین جلو را انتخاب کن
-      const frontCameraId = cameras.find(
-        (camera) => camera.label.toLowerCase().includes("front")
-      )?.deviceId;
-      setCameraId(frontCameraId);
-    }
-    
-    return cameras;
-  };
+
+      // پیدا کردن دوربین پشت با بهترین کیفیت
+      const rearCameras = cameras.filter(
+        (camera) =>
+          camera.label.toLowerCase().includes("back") ||
+          camera.label.toLowerCase().includes("rear")
+      );
+
+      if (rearCameras.length > 0) {
+        // انتخاب دوربین پشت با بهترین کیفیت
+        const bestRearCamera = rearCameras.reduce((prev, current) => {
+          if (current.width > prev.width) {
+            return current;
+          } else {
+            return prev;
+          }
+        });
+        setCameraId(bestRearCamera.deviceId);
+      } else {
+        // اگر دوربین پشت پیدا نشد، دوربین جلو را انتخاب کن
+        const frontCameraId = cameras.find((camera) =>
+          camera.label.toLowerCase().includes("front")
+        )?.deviceId;
+        setCameraId(frontCameraId);
+      }
+
+      return cameras;
+    };
     enableCamera()
       .then(disableCamera)
       .then(enumerateCameras)
       .then((cameras) => setCameras(cameras))
-      .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
+      .then(() => Quagga.CameraAccess.disableTorch())
       .catch((err) => setCameraError(err));
     return () => disableCamera();
   }, []);
