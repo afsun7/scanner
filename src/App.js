@@ -38,7 +38,7 @@ const App = () => {
           camera.label.toLowerCase().includes("rear")
       )?.deviceId;
 
-      const camerasFilter = cameras.find(
+      const camerasFilter = rearCameraId.find(
         (camera) =>
           camera.label.toLowerCase().includes("0") ||
           camera.label.toLowerCase().includes("back")
