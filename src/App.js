@@ -42,7 +42,7 @@ const App = () => {
       if (rearCameras.length > 0) {
         // انتخاب دوربین پشت با بهترین کیفیت
         const bestRearCamera = rearCameras.reduce((prev, current) => {
-          if (current.width > prev.width) {
+          if (current.width * current.height > prev.width * prev.height) {
             return current;
           } else {
             return prev;
@@ -60,7 +60,6 @@ const App = () => {
       return cameras;
     };
 
-  
     enableCamera()
       .then(disableCamera)
       .then(enumerateCameras)
