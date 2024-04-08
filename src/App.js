@@ -37,6 +37,13 @@ const App = () => {
     );
     
     if (rearCameras.length > 0) {
+   
+    // پیدا کردن دوربین پشت با بهترین کیفیت
+    const rearCameras = cameras.filter(
+      (camera) => camera.label.toLowerCase().includes("back") || camera.label.toLowerCase().includes("rear")
+    );
+    
+    if (rearCameras.length > 0) {
       // انتخاب دوربین پشت با بهترین کیفیت
       const bestRearCamera = rearCameras.reduce((prev, current) => {
         if (current.width > prev.width) {
@@ -46,8 +53,16 @@ const App = () => {
         }
       });
       setCameraId(bestRearCamera.deviceId);
-      return cameras;
-    };
+    } else {
+      // اگر دوربین پشت پیدا نشد، دوربین جلو را انتخاب کن
+      const frontCameraId = cameras.find(
+        (camera) => camera.label.toLowerCase().includes("front")
+      )?.deviceId;
+      setCameraId(frontCameraId);
+    }
+    
+    return cameras;
+  };
     enableCamera()
       .then(disableCamera)
       .then(enumerateCameras)
