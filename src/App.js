@@ -34,17 +34,11 @@ const App = () => {
       // پیدا کردن دوربین باکیفیت پشت
       const rearCameraId = cameras.find(
         (camera) =>
-          camera.label.toLowerCase().includes("back") ||
-          camera.label.toLowerCase().includes("rear")
+          camera.label.toLowerCase().includes("back") &&
+          camera.label.toLowerCase().includes("0")
       )?.deviceId;
 
-      const camerasFilter = rearCameraId.find(
-        (camera) =>
-          camera.label.toLowerCase().includes("0") ||
-          camera.label.toLowerCase().includes("back")
-      )?.deviceId;
-
-      setCameraId(camerasFilter[1]);
+      setCameraId(rearCameraId);
       return cameras;
     };
     enableCamera()
