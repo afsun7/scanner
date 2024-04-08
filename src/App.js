@@ -31,6 +31,14 @@ const App = () => {
     const enumerateCameras = async () => {
       const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
       console.log("Cameras Detected: ", cameras);
+      // پیدا کردن دوربین باکیفیت پشت
+      const rearCameraId = cameras.find(
+        (camera) =>
+          camera.label.toLowerCase().includes("back") ||
+          camera.label.toLowerCase().includes("rear")
+      )?.deviceId;
+
+      setCameraId(rearCameraId);
       return cameras;
     };
     enableCamera()
