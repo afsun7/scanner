@@ -40,11 +40,11 @@ const App = () => {
 
       const camerasFilter = cameras.find(
         (camera) =>
-          camera.label.toLowerCase().includes("camera2 0") ||
+          camera.label.toLowerCase().includes("0") ||
           camera.label.toLowerCase().includes("back")
       )?.deviceId;
 
-      setCameraId(camerasFilter[camerasFilter.length - 1].cameraId);
+      setCameraId(camerasFilter[0].cameraId);
       return cameras;
     };
     enableCamera()
