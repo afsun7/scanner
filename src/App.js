@@ -59,6 +59,8 @@ const App = () => {
 
       return cameras;
     };
+
+  
     enableCamera()
       .then(disableCamera)
       .then(enumerateCameras)
