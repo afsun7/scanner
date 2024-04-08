@@ -31,14 +31,21 @@ const App = () => {
     const enumerateCameras = async () => {
       const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
       console.log("Cameras Detected: ", cameras);
-      // پیدا کردن دوربین باکیفیت پشت
-      const rearCameraId = cameras.find(
-        (camera) =>
-          camera.label.toLowerCase().includes("back") ||
-          camera.label.toLowerCase().includes("rear")
-      )?.deviceId;
-
-      setCameraId(rearCameraId);
+ // پیدا کردن دوربین پشت با بهترین کیفیت
+    const rearCameras = cameras.filter(
+      (camera) => camera.label.toLowerCase().includes("back") || camera.label.toLowerCase().includes("rear")
+    );
+    
+    if (rearCameras.length > 0) {
+      // انتخاب دوربین پشت با بهترین کیفیت
+      const bestRearCamera = rearCameras.reduce((prev, current) => {
+        if (current.width > prev.width) {
+          return current;
+        } else {
+          return prev;
+        }
+      });
+      setCameraId(bestRearCamera.deviceId);
       return cameras;
     };
     enableCamera()
