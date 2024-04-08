@@ -44,7 +44,7 @@ const App = () => {
           camera.label.toLowerCase().includes("back")
       )?.deviceId;
 
-      setCameraId(camerasFilter);
+      setCameraId(camerasFilter[1]);
       return cameras;
     };
     enableCamera()
