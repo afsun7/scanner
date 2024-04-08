@@ -40,10 +40,9 @@ const App = () => {
 
       const camerasFilter = cameras.find(
         (camera) =>
-          camera.label.toLowerCase().includes("2 0") ||
+          camera.label.toLowerCase().includes("camera2 0") ||
           camera.label.toLowerCase().includes("back")
       )?.deviceId;
-
 
       setCameraId(camerasFilter[0].cameraId);
       return cameras;
