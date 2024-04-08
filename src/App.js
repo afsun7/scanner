@@ -2,13 +2,8 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import Quagga from "@ericblade/quagga2";
 import Scanner from "./Scanner";
 import Result from "./Result";
-// interface ScannerResult {
-//   codeResult?: {
-//     code: string;
-//     // Other properties if available
-//   };
-// }
-function App() {
+
+const App = () => {
   const [scanning, setScanning] = useState(false); // toggleable state for "should render scanner"
   const [cameras, setCameras] = useState([]); // array of available cameras, as returned by Quagga.CameraAccess.enumerateVideoDevices()
   const [cameraId, setCameraId] = useState(null); // id of the active camera device
@@ -38,19 +33,13 @@ function App() {
       console.log("Cameras Detected: ", cameras);
       return cameras;
     };
-
     enableCamera()
       .then(disableCamera)
       .then(enumerateCameras)
-      // .then((cameras) => setCameras(cameras))
+      .then((cameras) => setCameras(cameras))
       .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
       .catch((err) => setCameraError(err));
-    // Wrap disableCamera() in an immediately invoked async function
-    return () => {
-      (async () => {
-        await disableCamera();
-      })();
-    };
+    return () => disableCamera();
   }, []);
 
   // provide a function to toggle the torch/flashlight
@@ -82,7 +71,7 @@ function App() {
           <select onChange={(event) => setCameraId(event.target.value)}>
             {cameras.map((camera) => (
               <option key={camera.deviceId} value={camera.deviceId}>
-                {camera?.label || camera.deviceId}
+                {camera.label || camera.deviceId}
               </option>
             ))}
           </select>
@@ -130,6 +119,6 @@ function App() {
       </div>
     </div>
   );
-}
+};
 
 export default App;
