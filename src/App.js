@@ -21,34 +21,46 @@ const App = () => {
 
   // Normally, I would place this in an application level "initialization" event, but for this demo, I'm just going to put it in a useEffect() hook in the App component.
 
-  useEffect(() => {
-    const enableCamera = async () => {
-      await Quagga.CameraAccess.request(null, {});
-    };
-    const disableCamera = async () => {
-      await Quagga.CameraAccess.release();
-    };
-    const enumerateCameras = async () => {
-      const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
-      console.log("Cameras Detected: ", cameras);
-      // پیدا کردن دوربین باکیفیت پشت
-      const rearCameraId = cameras.find(
-        (camera) =>
-          camera.label.toLowerCase().includes("back") &&
-          camera.label.toLowerCase().includes("0")
-      )?.deviceId;
+useEffect(() => {
+  const enableCamera = async () => {
+    await Quagga.CameraAccess.request(null, {});
+  };
 
-      setCameraId(rearCameraId);
-      return cameras;
-    };
-    enableCamera()
-      .then(disableCamera)
-      .then(enumerateCameras)
-      .then((cameras) => setCameras(cameras))
-      .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
-      .catch((err) => setCameraError(err));
-    return () => disableCamera();
-  }, []);
+  const disableCamera = async () => {
+    await Quagga.CameraAccess.release();
+  };
+
+  const enumerateCameras = async () => {
+    const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
+    console.log("Cameras Detected: ", cameras);
+    // Finding rear camera of high quality
+    const rearCameraId = cameras.find(
+      (camera) =>
+        camera.label.toLowerCase().includes("back") &&
+        camera.label.toLowerCase().includes("0")
+    )?.deviceId;
+
+    setCameraId(rearCameraId);
+    return cameras;
+  };
+
+  enableCamera()
+    .then(disableCamera)
+    .then(enumerateCameras)
+    .then((cameras) => setCameras(cameras))
+    .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
+    .catch((err) => setCameraError(err));
+
+  // Returning a synchronous cleanup function
+  return () => {
+    // Call `disableCamera` without `await`. Handle errors if necessary.
+    disableCamera().catch((err) => {
+      console.error("Error disabling camera", err);
+    });
+  };
+}, []);
+
+
 
   // provide a function to toggle the torch/flashlight
   const onTorchClick = useCallback(() => {
