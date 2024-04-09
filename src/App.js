@@ -21,35 +21,32 @@ const App = () => {
 
   // Normally, I would place this in an application level "initialization" event, but for this demo, I'm just going to put it in a useEffect() hook in the App component.
 
-useEffect(() => {
-  // تابعی که دوربین را فعال می‌کند و لیست دوربین‌ها را بر می‌گرداند
-  const enableAndEnumerateCameras = async () => {
-    await Quagga.CameraAccess.request(null, {});
-    const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
-    console.log('Cameras Detected: ', cameras);
-    // دوربین پشت را پیدا می‌کند
-    const rearCameraId = cameras.find(
-      (camera) =>
-        camera.label.toLowerCase().includes('back') &&
-        camera.label.toLowerCase().includes('0')
-    )?.deviceId;
-    setCameraId(rearCameraId);
-    setCameras(cameras);
-    await Quagga.CameraAccess.disableTorch();
-  };
+  useEffect(() => {
+    const initializeCamera = async () => {
+      try {
+        await Quagga.CameraAccess.request(null, {});
+        const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
+        console.log("Cameras Detected: ", cameras);
+        const rearCameraId = cameras.find(
+          (camera) =>
+            camera.label.toLowerCase().includes("back") &&
+            camera.label.toLowerCase().includes("0")
+        )?.deviceId;
+        setCameraId(rearCameraId);
+        setCameras(cameras);
+        await Quagga.CameraAccess.disableTorch();
+      } catch (err) {
+        setCameraError(err);
+      }
+    };
 
-  // تابعی که دوربین را غیرفعال می‌کند
-  const disableCamera = async () => {
-    await Quagga.CameraAccess.release();
-  };
+    const cleanupCamera = async () => {
+      await Quagga.CameraAccess.release();
+    };
 
-  // تابع `enableAndEnumerateCameras` را فراخوانی می‌کند و در صورت بروز خطا آن را در `setCameraError` ذخیره می‌کند
-  enableAndEnumerateCameras()
-    .catch((err) => setCameraError(err));
-
-  // تابع `disableCamera` را به عنوان تابع تمیزکاری برمی‌گرداند
-  return disableCamera;
-}, []);
+    initializeCamera();
+    return cleanupCamera;
+  }, []);
 
   // provide a function to toggle the torch/flashlight
   const onTorchClick = useCallback(() => {
