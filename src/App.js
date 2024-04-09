@@ -26,12 +26,12 @@ useEffect(() => {
   const enableAndEnumerateCameras = async () => {
     await Quagga.CameraAccess.request(null, {});
     const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
-    console.log("Cameras Detected: ", cameras);
+    console.log('Cameras Detected: ', cameras);
     // دوربین پشت را پیدا می‌کند
     const rearCameraId = cameras.find(
       (camera) =>
-        camera.label.toLowerCase().includes("back") &&
-        camera.label.toLowerCase().includes("0")
+        camera.label.toLowerCase().includes('back') &&
+        camera.label.toLowerCase().includes('0')
     )?.deviceId;
     setCameraId(rearCameraId);
     setCameras(cameras);
@@ -44,7 +44,8 @@ useEffect(() => {
   };
 
   // تابع `enableAndEnumerateCameras` را فراخوانی می‌کند و در صورت بروز خطا آن را در `setCameraError` ذخیره می‌کند
-  enableAndEnumerateCameras().catch((err) => setCameraError(err));
+  enableAndEnumerateCameras()
+    .catch((err) => setCameraError(err));
 
   // تابع `disableCamera` را به عنوان تابع تمیزکاری برمی‌گرداند
   return disableCamera;
