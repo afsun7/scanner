@@ -33,9 +33,9 @@ const App = () => {
       console.log("Cameras Detected: ", cameras);
       // پیدا کردن دوربین باکیفیت پشت
       const rearCameraId = cameras.find(
-        (camera) =>(
+        (camera) =>
           camera.label.toLowerCase().includes("back") &&
-          camera.label.toLowerCase().includes("0")) 
+          camera.label.toLowerCase().includes("0")
       )?.deviceId;
 
       setCameraId(rearCameraId);
@@ -75,15 +75,16 @@ const App = () => {
           beforehand
         </p>
       ) : (
-        <form>
-          <select onChange={(event) => setCameraId(event.target.value)}>
-            {cameras.map((camera) => (
-              <option key={camera.deviceId} value={camera.deviceId}>
-                {camera.label || camera.deviceId}
-              </option>
-            ))}
-          </select>
-        </form>
+        ""
+        // <form>
+        //   <select onChange={(event) => setCameraId(event.target.value)}>
+        //     {cameras.map((camera) => (
+        //       <option key={camera.deviceId} value={camera.deviceId}>
+        //         {camera.label || camera.deviceId}
+        //       </option>
+        //     ))}
+        //   </select>
+        // </form>
       )}
       <button onClick={onTorchClick}>
         {torchOn ? "Disable Torch" : "Enable Torch"}
