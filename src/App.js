@@ -22,30 +22,32 @@ const App = () => {
   // Normally, I would place this in an application level "initialization" event, but for this demo, I'm just going to put it in a useEffect() hook in the App component.
 
   useEffect(() => {
-    const initializeCamera = async () => {
-      try {
-        await Quagga.CameraAccess.request(null, {});
-        const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
-        console.log("Cameras Detected: ", cameras);
-        const rearCameraId = cameras.find(
-          (camera) =>
-            camera.label.toLowerCase().includes("back") &&
-            camera.label.toLowerCase().includes("0")
-        )?.deviceId;
-        setCameraId(rearCameraId);
-        setCameras(cameras);
-        await Quagga.CameraAccess.disableTorch();
-      } catch (err) {
-        setCameraError(err);
-      }
+    const enableCamera = async () => {
+      await Quagga.CameraAccess.request(null, {});
     };
-
-    const cleanupCamera = async () => {
+    const disableCamera = async () => {
       await Quagga.CameraAccess.release();
     };
+    const enumerateCameras = async () => {
+      const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
+      console.log("Cameras Detected: ", cameras);
+      // پیدا کردن دوربین باکیفیت پشت
+      const rearCameraId = cameras.find(
+        (camera) =>
+          camera.label.toLowerCase().includes("back") &&
+          camera.label.toLowerCase().includes("0")
+      )?.deviceId;
 
-    initializeCamera();
-    return cleanupCamera;
+      setCameraId(rearCameraId);
+      return cameras;
+    };
+    enableCamera()
+      .then(disableCamera)
+      .then(enumerateCameras)
+      .then((cameras) => setCameras(cameras))
+      .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
+      .catch((err) => setCameraError(err));
+    return () => disableCamera();
   }, []);
 
   // provide a function to toggle the torch/flashlight
