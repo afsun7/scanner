@@ -21,34 +21,34 @@ const App = () => {
 
   // Normally, I would place this in an application level "initialization" event, but for this demo, I'm just going to put it in a useEffect() hook in the App component.
 
-  useEffect(() => {
-    const enableCamera = async () => {
-      await Quagga.CameraAccess.request(null, {});
-    };
-    const disableCamera = async () => {
-      await Quagga.CameraAccess.release();
-    };
-    const enumerateCameras = async () => {
-      const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
-      console.log("Cameras Detected: ", cameras);
-      // پیدا کردن دوربین باکیفیت پشت
-      const rearCameraId = cameras.find(
-        (camera) =>
-          camera.label.toLowerCase().includes("back") &&
-          camera.label.toLowerCase().includes("0")
-      )?.deviceId;
+useEffect(() => {
+  // تابعی که دوربین را فعال می‌کند و لیست دوربین‌ها را بر می‌گرداند
+  const enableAndEnumerateCameras = async () => {
+    await Quagga.CameraAccess.request(null, {});
+    const cameras = await Quagga.CameraAccess.enumerateVideoDevices();
+    console.log("Cameras Detected: ", cameras);
+    // دوربین پشت را پیدا می‌کند
+    const rearCameraId = cameras.find(
+      (camera) =>
+        camera.label.toLowerCase().includes("back") &&
+        camera.label.toLowerCase().includes("0")
+    )?.deviceId;
+    setCameraId(rearCameraId);
+    setCameras(cameras);
+    await Quagga.CameraAccess.disableTorch();
+  };
 
-      setCameraId(rearCameraId);
-      return cameras;
-    };
-    enableCamera()
-      .then(disableCamera)
-      .then(enumerateCameras)
-      .then((cameras) => setCameras(cameras))
-      .then(() => Quagga.CameraAccess.disableTorch()) // disable torch at start, in case it was enabled before and we hot-reloaded
-      .catch((err) => setCameraError(err));
-    return () => disableCamera();
-  }, []);
+  // تابعی که دوربین را غیرفعال می‌کند
+  const disableCamera = async () => {
+    await Quagga.CameraAccess.release();
+  };
+
+  // تابع `enableAndEnumerateCameras` را فراخوانی می‌کند و در صورت بروز خطا آن را در `setCameraError` ذخیره می‌کند
+  enableAndEnumerateCameras().catch((err) => setCameraError(err));
+
+  // تابع `disableCamera` را به عنوان تابع تمیزکاری برمی‌گرداند
+  return disableCamera;
+}, []);
 
   // provide a function to toggle the torch/flashlight
   const onTorchClick = useCallback(() => {
